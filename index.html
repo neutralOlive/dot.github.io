@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            /* text-align: center; */
+            justify-content: center;
+            align-items: center;
+            /* margin: auto; */
+            height: 100%;
+            width: 100%;
+            font-family: Georgia, Times, "Times New Roman", serif; 
+        }
+
+        #progress-text {
+            /* transition: 0.5s linear all; */
+
+            letter-spacing: 25px;
+            text-align: center;
+            margin-top: 60px;
+            /* margin: auto; */
+            line-height: 1em;
+            /* padding: auto; */
+            text-indent: 25px;
+            font-size: 15px;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+            text-align: center;
+            
+            /* left: 50%; */
+            /* width: 40%; */
+            /* display: inline-block; */
+            /* padding: 10px; */
+
+
+            /* margin: 0 auto; */
+            /* padding: 10px; */
+            /* width: 500px;
+            height: 500px; */
+        }
+
+        /* #text {
+            display: inline-block;
+
+        }
+*/
+        #container {
+            position: absolute;
+            left: 50%;
+            top: 55%;
+            transform: translate(-50%, -50%);
+
+            /* display: flex; */
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+            /* display: flex; */
+
+            /* border: 1px solid black; */
+            /* width: 500px; */
+            /* height: 500px; */
+            /* height: 40%; */
+            /* align-items: center; */
+            text-align: center;
+        } 
+
+        .timer {
+            /* transition: 2s linear all; */
+
+            /* position:relative; */
+            font-size: 180px;
+            /* align-self: auto; */
+            margin: auto;
+            /* text-align: center; */
+            width:1em;
+            height:1em;
+            /* float: left; */
+            /* align-content: center; */
+            /* transition: 1s linear all; */
+        }
+
+        .timer > .percent {
+            /* transition: 0.5s linear all; */
+
+            position: absolute;
+            /* top: 1.05em; */
+            /* left: 0; */
+            width: 3.33em;
+            font-size: 0.3em;
+            text-align:center;
+
+        }
+
+        .timer > #slice {
+            /* transition: 0.5s linear all; */
+
+            position:absolute;
+            width:1em;
+            height:1em;
+            clip:rect(0px,1em,1em,0.5em);
+        }
+
+        .timer > #slice.gt50 {
+            /* transition: 0.5s linear all; */
+
+            clip:rect(auto, auto, auto, auto);
+            /* border: 1px solid red; */
+            /* background-color: red; */
+        }
+
+        .timer > #slice > .pie {
+            /* transition: 0.5s linear all; */
+
+            border: 0.1em solid #c0c0c0;
+            position:absolute;
+            width:0.8em; /* 1 - (2 * border width) */
+            height:0.8em; /* 1 - (2 * border width) */
+            clip:rect(0em,0.5em,1em,0em);
+            -moz-border-radius:0.5em;
+            -webkit-border-radius:0.5em; 
+            border-radius:0.5em; 
+
+        }
+
+        .timer > #slice > .pie.fill {
+            /* transition: 0.5s linear all; */
+
+            /* background-color: blue; */
+            /* border: 1px solid blue; */
+            -moz-transform:rotate(180deg) !important;
+            -webkit-transform:rotate(180deg) !important;
+            -o-transform:rotate(180deg) !important;
+            transform:rotate(180deg) !important;
+
+        }
+
+        .timer.fill > .percent {
+            /* transition: 2s linear all; */
+
+            /* display: inline-block; */
+            /* background-color: blue; */
+            /* border: 1px solid blue; */
+            display: none;
+        }
+
+        .timer.fill > #slice > .pie {
+            /* transition: 0.5s linear all; */
+
+            /* background-color: blue;
+            border: 1px solid blue; */
+            border: transparent;
+            background-color: black;
+              /* #c0c0c0; */
+            width:1em;
+            height:1em;
+
+        }
+
+    </style>
+    <title>PIE</title>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> -->
+
+</head>
+<body>
+    <!-- <p><input type="button" id="watch" value="Start" /> count down from <input type="text" id="watch" size="2" value="10" /> seconds</p> -->
+    <div class="center" id="container">
+
+        <!-- <div style="margin-bottom: 50px;">
+            <input type="button" id="watch" value="Start" /> 
+            count down from 
+            <input type="text" id="watch" size="2" value="5" /> 
+            seconds
+        </div> -->
+
+        <div class="timer fill"></div>
+
+        <div id="progress-text"></div>
+
+    </div>
+    <!-- <div id="app"></div> -->
+    <!-- <div class="timer"></div> -->
+
+    <!-- <script type="text/javascript"> -->
+    <!-- <script src="//code.jquery.com/jquery.min.js"></script>
+    <script src="circular-countdown.js"></script> -->
+    <script src="NoSleep.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+    <script>
+        // credit: https://codepen.io/davidpowell/pen/VaNvgw
+        var timer;
+
+        var timerCurrent;
+        var timerFinish;
+        var timerSeconds;
+
+        var working = 1;
+        var value = 1500;
+        // var resting = 0;
+
+                
+        function formatTime(time) {
+            // console.log("formattime");
+            let minutes = Math.floor(time / 60);
+            let seconds = time % 60;
+            if (time === 0) {
+                return '00:00';
+            }
+
+            if (seconds < 10) {
+                seconds = `0${seconds}`;
+            }
+
+            if (minutes < 10) {
+                minutes = `0${minutes}`;
+            }
+            
+            return `${minutes}:${seconds}`;
+        }
+        
+        function drawTimer(percent){
+            // console.log("drawTimer(",percent,")");
+
+            $('div.timer')
+                .html('<div class="percent"></div><div id="slice"'
+                    +(percent > 50?' class="gt50"':'')
+                    +'><div class="pie"></div>'
+                    +(percent > 50?'<div class="pie fill"></div>':'')
+                    +'</div>');
+
+                    // .css("transition","all 1s")
+            // $('div.timer').css('transition','1s');
+            // $('div.timer').html('<div class="pie"></div>');
+                // 저건 맞는듯. 50보다 작으면 가릴수있지 rectangle로
+
+            var deg = 360/100*percent; // deg는 동일한가? 그 percent만 반대인가?
+            // deg = 360-deg; // 그럼 deg에서 승부가 나는거같은디
+            // deg -= 90;
+            console.log("percent:" , percent, "deg:", deg);
+            console.log($('#slice .pie'));
+            $('#slice .pie').css({
+                'transition':'0.5s linear all',
+                '-moz-transform':'rotate('+deg+'deg)',
+                '-webkit-transform':'rotate('+deg+'deg)',
+                '-o-transform':'rotate('+deg+'deg)',
+                'transform':'rotate('+deg+'deg)'
+            });
+            // $('#slice .pie').css('transition','1s');
+            // transform: rotateX(180deg)
+            // $('.percent').css("transition","all linear 0.2s");
+            // $('.percent').html(Math.round(percent)+'%')
+            
+        }
+
+        var updateTime = 0;
+        function stopWatch(){
+            // var seconds = (timerFinish-(new Date().getTime()))/1000;
+            // console.log("seconds:", seconds);
+
+            timerCurrent = timerCurrent += 1;//0.05;
+            seconds = timerSeconds - timerCurrent;
+
+            if(seconds <= 0){ // stop timer
+                // drawTimer(100); // 끝나면 border 1px, fill none
+                drawTimer(0);
+                $('div.timer').css({
+                    "border":"1.5px solid black",
+                    "border-radius":"100%",
+                    "transition":"1s linear all"
+                });
+                
+                // $('div.timer').css();
+                // $('#progress-text').text("00:00");
+                var newText = formatTime(0);
+                $('#progress-text').text(newText);
+                // 휴식엔 뭘로 할까
+                clearInterval(timer);
+                // $('input[type=button]#watch').val('Start');
+                // resting = 1;
+                working = 0;
+                // alert('Finished counting down from '+timerSeconds);
+            }else{ // keep running
+                var percent = 100-((seconds/timerSeconds)*100);
+                percent = 100-percent;
+                // if (updateTime == 19) {
+                var newText = formatTime(seconds);
+                $('#progress-text').text(newText);//.css("transition", "0.5s linear all");
+                    // updateTime = 0
+                // } else {
+                    // updateTime = 1;
+                    // updateTime += 1;
+                // }
+
+                // console.log(newText);
+                // console.log("keep running");
+                drawTimer(percent);
+            }
+        }
+
+        // var work_percent = 10;
+
+        $(document).ready(function(){
+            // $('input[type=button]#percent').click(function(e){
+            //     console.log("this:", $('input[type=button]#percent'));
+            //     e.preventDefault();
+            //     drawTimer($('input[type=text]#percent').val());
+            // });
+
+            // $('input[type=button]#size').click(function(e){
+            //     e.preventDefault();
+            //     $('.timer').css('font-size',$('input[type=text]#size').val()+'px');
+            // });
+
+            // $('input[type=button]#watch').click(function(e){
+
+            //     e.preventDefault();
+            //     if($('input[type=button]#watch').val() == 'Start'){
+            //         $('input[type=button]#watch').val('Stop');
+            //         timerSeconds = $('input[type=text]#watch').val();
+            //         timerCurrent = 0;
+            //         timerFinish = new Date().getTime()+(timerSeconds*1000);
+            //         timer = setInterval('stopWatch()',50);
+            //     }else{
+            //         $('input[type=button]#watch').val('Start');
+            //         clearInterval(timer);
+            //     }
+            // });
+
+            // e.preventDefault();
+            // if($('input[type=button]#watch').val() == 'Start'){ // start timer
+            if (working) {
+                // $('input[type=button]#watch').val('Stop');
+                // timerSeconds = $('input[type=text]#watch').val();
+                timerSeconds = value;
+                timerCurrent = 0;
+                drawTimer(100);
+                // timerFinish = new Date().getTime()+(timerSeconds*1000);
+                var newText = formatTime(value);
+                $('#progress-text').text(newText);
+                timer = setInterval('stopWatch()', 1000);
+            } else{ // stop timer
+                // $('input[type=button]#watch').val('Start');
+                // resting = 1;
+                working = 0;
+                clearInterval(timer);
+            }
+            // $('input[type=button]#watch').click();
+
+        });
+
+
+
+
+
+
+        // no sleep alert
+        function removeAlertLayer(savedAlertLayer) {
+            // credit: https://stackoverflow.com/questions/33424138/how-to-remove-a-div-with-fade-out-effect-in-javascript
+            speed = 2500;
+            var seconds = speed/1000;
+            savedAlertLayer.style.transition = "opacity "+seconds+"s ease";
+            savedAlertLayer.style.opacity = 0;
+            setTimeout(function() {
+                savedAlertLayer.parentNode.removeChild(savedAlertLayer);
+            }, speed);
+        }
+
+        function showSavedAlert() {
+            var savedAlertLayer = document.createElement("DIV");
+            savedAlertLayer.appendChild(document.createTextNode("No Sleep"));
+            savedAlertLayer.style.position = 'absolute';
+            savedAlertLayer.style.left = '10px';
+            savedAlertLayer.style.top = '30px';
+            savedAlertLayer.style.width = '700px';
+            savedAlertLayer.style.height = '100px';
+            savedAlertLayer.style.fontSize = "20px";
+            savedAlertLayer.style.padding = '15px';
+            savedAlertLayer.style.fontWeight = "bold";
+            savedAlertLayer.style.color = "black";
+            document.body.appendChild(savedAlertLayer);
+            setTimeout(function() {
+                removeAlertLayer(savedAlertLayer);
+            }, 1000);
+        }
+        
+        // iOS: 
+        // https://github.com/richtr/NoSleep.js
+        var noSleep = new NoSleep();
+        // Enable wake lock.
+        // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
+        // document.addEventListener('click', function enableNoSleep() {
+        window.addEventListener('load', (event) => {
+            // document.removeEventListener('click', enableNoSleep, false);
+            noSleep.enable();
+            console.log("noSleep enabled");
+            showSavedAlert();
+        });
+
+
+        // CHROME:
+            // test support
+        let isSupported = false;
+
+        if ('wakeLock' in navigator) {
+            isSupported = true;
+            // statusElem.textContent = 'Screen Wake Lock API supported 🎉';
+        } else {
+            // if (wakeButton) {
+            //     wakeButton.disabled = true;
+            // }
+            // statusElem.textContent = 'Wake lock is not supported by this browser.';
+        }
+
+        if (isSupported) {
+        // create a reference for the wake lock
+            let wakeLock = null;
+
+            // create an async function to request a wake lock
+            const requestWakeLock = async () => {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+
+                    // change up our interface to reflect wake lock active
+                    changeUI();
+
+                    // listen for our release event
+                    wakeLock.onrelease = function(ev) {
+                        console.log(ev);
+                    }
+                    // wakeLock.addEventListener('release', () => {
+                    //     // if wake lock is released alter the button accordingly
+                    //     changeUI('released');
+                    // });
+
+                } catch (err) {
+                    // if wake lock request fails - usually system related, such as battery
+                    // wakeButton.dataset.status = 'off';
+                    // wakeButton.textContent = 'Turn Wake Lock ON';
+                    // statusElem.textContent = `${err.name}, ${err.message}`;
+                }
+            } // requestWakeLock()
+        }
+
+        // Credit: Mateusz Rybczonek
+        /*
+        const FULL_DASH_ARRAY = 283;
+        const WARNING_THRESHOLD = 120;// 10;
+        const ALERT_THRESHOLD = 60;//5;
+    
+        const COLOR_CODES = {
+            info: {
+                color: "green"
+            },
+            warning: {
+                color: "orange",
+                threshold: WARNING_THRESHOLD
+            },
+            alert: {
+                color: "red",
+                threshold: ALERT_THRESHOLD
+            }
+        };
+    
+        var TIME_LIMIT = 1500;// 5;
+        var timePassed = 0;
+        var timeLeft = TIME_LIMIT;
+        var timerInterval = null;
+        var remainingPathColor = COLOR_CODES.info.color;
+    
+        document.getElementById("app").innerHTML = `
+            <div class="base-timer">
+            <svg class="base-timer__svg" viewBox="0 -50 100 100" xmlns="http://www.w3.org/2000/svg" style="height: 100%; width: auto; overflow: visible">
+                <g class="base-timer__circle">
+                    <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45" />
+
+                arc({
+                    x: 150,
+                    y: 150,
+                    r: 100,
+                    start: 100,
+                    end: 360,
+                })
+                </g>
+            </svg>
+            <span id="base-timer-label" class="base-timer__label">${formatTime(
+                timeLeft
+            )}</span>
+            </div>
+            `;
+    */
+        // startTimer();
+        var rest = 0;
+        function onTimesUp() {
+            clearInterval(timerInterval);
+            if (rest == 0) {
+                rest = 1;
+                TIME_LIMIT = 300; //1500;// 5;
+                timePassed = 0;
+                timeLeft = TIME_LIMIT;
+                timerInterval = null;
+                remainingPathColor = COLOR_CODES.info.color;
+                // alert(timeLeft);
+                startTimer();
+            }
+        }
+        
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timePassed = timePassed += 1;
+                timeLeft = TIME_LIMIT - timePassed;
+                // alert(timeLeft);
+                document.getElementById("base-timer-label").innerHTML = formatTime(
+                    timeLeft
+                );
+                setCircleDasharray();
+                setRemainingPathColor(timeLeft);
+        
+                if (timeLeft === 0) {
+                    onTimesUp();
+                }
+            }, 1000);
+        }
+
+        
+        function setRemainingPathColor(timeLeft) {
+            const { alert, warning, info } = COLOR_CODES;
+            if (timeLeft <= alert.threshold) {
+                document
+                .getElementById("base-timer-path-remaining")
+                .classList.remove(warning.color);
+                document
+                .getElementById("base-timer-path-remaining")
+                .classList.add(alert.color);
+            } else if (timeLeft <= warning.threshold) {
+                document
+                .getElementById("base-timer-path-remaining")
+                .classList.remove(info.color);
+                document
+                .getElementById("base-timer-path-remaining")
+                .classList.add(warning.color);
+            }
+        }
+        
+        function calculateTimeFraction() {
+            const rawTimeFraction = timeLeft / TIME_LIMIT;
+            return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+        }
+        
+        function setCircleDasharray() {
+        const circleDasharray = `${(
+            calculateTimeFraction() * FULL_DASH_ARRAY
+        ).toFixed(0)} 283`;
+        document
+            .getElementById("base-timer-path-remaining")
+            .setAttribute("stroke-dasharray", circleDasharray);
+        }
+    </script>
+</body>
+</html>
